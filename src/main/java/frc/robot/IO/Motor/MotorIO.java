@@ -14,6 +14,8 @@ public interface MotorIO {
 
     /** Container for all motor inputs & sensor values. */
     public class MotorIOValues {
+        public MotorIOValues() {}
+
         public double appliedVoltage = 0.0; // volts
         public double currentAmps = 0.0;    // amps
         public double tempCelsius = 0.0;    // degrees Celsius
