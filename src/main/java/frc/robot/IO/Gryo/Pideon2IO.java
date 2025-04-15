@@ -1,13 +1,13 @@
 package frc.robot.IO.Gryo;
 
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Rotation3d;
+import frc.robot.Utils.TimestampedValue;
 
 public class Pideon2IO implements GryoIO {
     private Pigeon2 pigeon;
-
     /**
      * 
      * @param pigeon Pre-configured pigeon
@@ -18,12 +18,18 @@ public class Pideon2IO implements GryoIO {
     
 
     @Override
-    //TODO: FINISH THIS
     public void updateInputs(GryoIOValues values) {
-        values.connected = pigeon.isConnected();
+        double timestampNow = Utils.fpgaToCurrentTime(Utils.getCurrentTimeSeconds());
+        values.position.update(pigeon.getRotation3d(), timestampNow);
 
-        values.positionYaw = Rotation2d.fromDegrees(pigeon.getYaw().getValueAsDouble());
-        values.velocityRadPerSecYaw = Units.degreesToRadians(pigeon.getAngularVelocityZWorld().getValueAsDouble());
+        values.pastOdometryPositions.add(
+            new TimestampedValue<Rotation3d>(pigeon.getRotation3d(), timestampNow)
+        );
+
+        values.velocityYaw.update(pigeon.getAngularVelocityZWorld().getValueAsDouble(), timestampNow);
+        //TODO: make sure these values are correct possible need to switch X and Y (pitch and roll)
+        values.velocityPitch.update(pigeon.getAngularVelocityXWorld().getValueAsDouble(), timestampNow);
+        values.velocityRoll.update(pigeon.getAngularVelocityYWorld().getValueAsDouble(), timestampNow);
     }
 
     @Override

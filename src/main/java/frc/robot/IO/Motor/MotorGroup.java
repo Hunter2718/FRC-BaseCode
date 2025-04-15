@@ -21,7 +21,6 @@ public class MotorGroup {
         }
         // Pad the motorValues list if it's shorter than the motors list
         else if (motorValuesSize < motorCount) {
-            // Optionally, pad with default values (e.g., new MotorIOValues())
             while (motorValues.size() < motorCount) {
                 motorValues.add(new MotorIOValues());
             }
@@ -72,6 +71,8 @@ public class MotorGroup {
      * synchronizeMotors(motorValues.get(index).encoderValues.velocity)
      * This will sync all motors to the velocity of the motor from the motor values. If
      * you don't do this then it is basically the same as setAllVelocity(velocityToSync)
+     * 
+     * This does the same as setAllVelocity(velocity)
      */
     public void synchronizeMotors(double velocityToSync) {
         for (MotorIO motor : motors) {

@@ -1,15 +1,14 @@
 package frc.robot.IO.Motor;
 
 import com.ctre.phoenix6.Utils;
-import com.revrobotics.spark.SparkMax;
+import com.ctre.phoenix6.hardware.TalonFX;
 
-public class SparkMaxIO implements MotorIO {
-
-    private SparkMax sparkMaxMotor; // Motor controller instance
+public class TalonFXIO implements MotorIO {
+    private TalonFX motor; // Motor controller instance
 
     // Constructor to initialize SparkMaxIO with the motor
-    public SparkMaxIO(SparkMax motor) {
-        this.sparkMaxMotor = motor;
+    public TalonFXIO(TalonFX motor) {
+        this.motor = motor;
     }
 
     /**
@@ -18,22 +17,22 @@ public class SparkMaxIO implements MotorIO {
      */
     @Override
     public void updateInputs(MotorIOValues inputs) {
-        // Update motor-specific values (voltage, current, temperature) from the SparkMax
+        // Update motor-specific values (voltage, current, temperature) from the SparkFlex
         double timestampNow = Utils.fpgaToCurrentTime(Utils.getCurrentTimeSeconds());
 
-        inputs.appliedVoltage.update(sparkMaxMotor.getAppliedOutput() * sparkMaxMotor.getBusVoltage(), timestampNow);
-        inputs.currentAmps.update(sparkMaxMotor.getOutputCurrent(), timestampNow);
-        inputs.tempCelsius.update(sparkMaxMotor.getMotorTemperature(), timestampNow);
+        inputs.appliedVoltage.update(motor.getMotorVoltage().getValueAsDouble(), timestampNow);
+        inputs.currentAmps.update(motor.getSupplyCurrent().getValueAsDouble(), timestampNow);
+        inputs.tempCelsius.update(motor.getDeviceTemp().getValueAsDouble(), timestampNow);
     }
 
     /**
      * Run the motor with internal velocity control (closed-loop).
      * 
-     * @param velocity - Desired velocity in RPM or other units like % speed for Spark, SparkMax, SparkFlex
+     * @param velocity - Desired velocity in RPM or other units
      */
     @Override
     public void setVelocity(double velocity) {
-        sparkMaxMotor.set(velocity);  // Set the motor speed (closed-loop)
+        motor.set(velocity);  // Set the motor speed (closed-loop)
     }
 
     /**
@@ -43,7 +42,7 @@ public class SparkMaxIO implements MotorIO {
      */
     @Override
     public void setVoltage(double volts) {
-        sparkMaxMotor.setVoltage(volts);  // Apply the given voltage to the motor
+        motor.setVoltage(volts);  // Apply the given voltage to the motor
     }
 
     /**
@@ -51,6 +50,6 @@ public class SparkMaxIO implements MotorIO {
      */
     @Override
     public void stop() {
-        sparkMaxMotor.stopMotor();
+        motor.stopMotor();
     }
 }

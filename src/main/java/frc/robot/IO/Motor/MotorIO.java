@@ -1,9 +1,6 @@
 package frc.robot.IO.Motor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import frc.robot.IO.Encoder.EncoderIO;
+import frc.robot.Utils.TimestampedValue;
 
 /**
  * MotorIO abstracts a pre-configured motor.
@@ -16,11 +13,9 @@ public interface MotorIO {
     public class MotorIOValues {
         public MotorIOValues() {}
 
-        public double appliedVoltage = 0.0; // volts
-        public double currentAmps = 0.0;    // amps
-        public double tempCelsius = 0.0;    // degrees Celsius
-
-        List<EncoderIO.EncoderIOValues> encoderValues = new ArrayList<>();
+        public TimestampedValue<Double> appliedVoltage = new TimestampedValue<>(0.0, 0); // volts
+        public TimestampedValue<Double> currentAmps = new TimestampedValue<>(0.0, 0);    // amps
+        public TimestampedValue<Double> tempCelsius = new TimestampedValue<>(0.0, 0);    // degrees Celsius
     }
 
     /**

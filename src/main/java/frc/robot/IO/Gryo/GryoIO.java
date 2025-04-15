@@ -1,26 +1,29 @@
 package frc.robot.IO.Gryo;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import java.util.Arrays;
+import java.util.List;
+
+import edu.wpi.first.math.geometry.Rotation3d;
+import frc.robot.Utils.TimestampedValue;
 
 public interface GryoIO { 
     public class GryoIOValues {
-        public boolean connected = false;
 
-        public Rotation2d positionYaw = new Rotation2d();
-        public double velocityRadPerSecYaw = 0.0;
-        public double[] odometryTimestampsYaw = new double[] {};
-        public Rotation2d[] odometryPositionsYaw = new Rotation2d[] {};
-
-        public Rotation2d positionPitch = new Rotation2d();
-        public double velocityRadPerSecPitch = 0.0;
-        public double[] odometryTimestampsPitch = new double[] {};
-        public Rotation2d[] odometryPositionsPitch = new Rotation2d[] {};
-    
-        public Rotation2d positionRoll = new Rotation2d();
-        public double velocityRadPerSecRoll = 0.0;
-        public double[] odometryTimestampsRoll = new double[] {};
-        public Rotation2d[] odometryPositionsRoll = new Rotation2d[] {};
+        public TimestampedValue<Rotation3d> position = 
+            new TimestampedValue<>(
+                new Rotation3d(0, 0, 0),
+                0
+            );
         
+        public List<TimestampedValue<Rotation3d>> pastOdometryPositions = 
+            Arrays.asList(
+                new TimestampedValue<>(new Rotation3d(0.0, 0.0, 0.0), 0)
+            );
+
+
+        public TimestampedValue<Double> velocityYaw = new TimestampedValue<>(0.0, 0); //deg/s
+        public TimestampedValue<Double> velocityPitch = new TimestampedValue<>(0.0, 0); //deg/s
+        public TimestampedValue<Double> velocityRoll = new TimestampedValue<>(0.0, 0); //deg/s
     }
 
     // Update the gryo values — read from hardware and update the provided values

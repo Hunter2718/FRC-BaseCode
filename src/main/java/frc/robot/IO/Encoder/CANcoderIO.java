@@ -1,13 +1,12 @@
 package frc.robot.IO.Encoder;
 
-import com.revrobotics.RelativeEncoder;
-
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.CANcoder;
 
-public class RelativeEncoderIO implements EncoderIO {
-    private RelativeEncoder encoder;
-    
-    public RelativeEncoderIO(RelativeEncoder encoder) {
+public class CANcoderIO implements EncoderIO {
+    private CANcoder encoder;
+
+    public CANcoderIO(CANcoder encoder) {
         this.encoder = encoder;
     }
 
@@ -15,8 +14,8 @@ public class RelativeEncoderIO implements EncoderIO {
     @Override
     public void updateInputs(EncoderIOValues values) {
         double timestampNow = Utils.fpgaToCurrentTime(Utils.getCurrentTimeSeconds());
-        values.position.update(encoder.getPosition(), timestampNow);
-        values.velocity.update(encoder.getVelocity(), timestampNow);
+        values.position.update(encoder.getPosition().getValueAsDouble(), timestampNow);
+        values.velocity.update(encoder.getVelocity().getValueAsDouble(), timestampNow);
     }
 
     // Optional: Reset encoder position

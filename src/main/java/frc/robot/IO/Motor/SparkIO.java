@@ -1,15 +1,14 @@
 package frc.robot.IO.Motor;
 
 import com.ctre.phoenix6.Utils;
-import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 
-public class SparkMaxIO implements MotorIO {
-
-    private SparkMax sparkMaxMotor; // Motor controller instance
+public class SparkIO implements MotorIO {
+    private Spark motor; // Motor controller instance
 
     // Constructor to initialize SparkMaxIO with the motor
-    public SparkMaxIO(SparkMax motor) {
-        this.sparkMaxMotor = motor;
+    public SparkIO(Spark motor) {
+        this.motor = motor;
     }
 
     /**
@@ -18,12 +17,10 @@ public class SparkMaxIO implements MotorIO {
      */
     @Override
     public void updateInputs(MotorIOValues inputs) {
-        // Update motor-specific values (voltage, current, temperature) from the SparkMax
+        // Update motor-specific values (voltage, current, temperature) from the Spark
         double timestampNow = Utils.fpgaToCurrentTime(Utils.getCurrentTimeSeconds());
 
-        inputs.appliedVoltage.update(sparkMaxMotor.getAppliedOutput() * sparkMaxMotor.getBusVoltage(), timestampNow);
-        inputs.currentAmps.update(sparkMaxMotor.getOutputCurrent(), timestampNow);
-        inputs.tempCelsius.update(sparkMaxMotor.getMotorTemperature(), timestampNow);
+        inputs.appliedVoltage.update(motor.getVoltage(), timestampNow);
     }
 
     /**
@@ -33,17 +30,19 @@ public class SparkMaxIO implements MotorIO {
      */
     @Override
     public void setVelocity(double velocity) {
-        sparkMaxMotor.set(velocity);  // Set the motor speed (closed-loop)
+        motor.set(velocity);  // Set the motor speed (closed-loop)
     }
 
     /**
      * Run the motor with direct voltage (open-loop).
      * 
      * @param volts - Voltage to apply to the motor (open-loop)
+     * 
+     * NOTE: This function *must* be called regularly in order for voltage compensation to work properly - unlike the ordinary set function, it is not "set it and forget it."
      */
     @Override
     public void setVoltage(double volts) {
-        sparkMaxMotor.setVoltage(volts);  // Apply the given voltage to the motor
+        motor.setVoltage(volts);  // Apply the given voltage to the motor
     }
 
     /**
@@ -51,6 +50,6 @@ public class SparkMaxIO implements MotorIO {
      */
     @Override
     public void stop() {
-        sparkMaxMotor.stopMotor();
+        motor.stopMotor();
     }
 }
