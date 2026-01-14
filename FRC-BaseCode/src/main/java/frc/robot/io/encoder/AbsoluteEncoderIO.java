@@ -1,0 +1,35 @@
+package frc.robot.io.encoder;
+
+import com.revrobotics.AbsoluteEncoder;
+
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
+
+public class AbsoluteEncoderIO implements EncoderIO {
+    private AbsoluteEncoder encoder;
+    private double resetEncoderValueRad;
+
+    /**
+     * 
+     * @param encoder Pre-Configured absoluet encoder
+     */
+    public AbsoluteEncoderIO(AbsoluteEncoder encoder) {
+        this.encoder = encoder;
+        resetEncoderValueRad = 0.0;
+    }
+    
+
+    // Update the encoder values — read from hardware and update the provided values
+    @Override
+    public void updateInputs(EncoderIOValues values) {
+        double timestampNow = Timer.getFPGATimestamp();
+        values.positionRad.update(Units.rotationsToRadians(encoder.getPosition()) + resetEncoderValueRad, timestampNow);
+        values.velocityRadPerSec.update(Units.rotationsPerMinuteToRadiansPerSecond(encoder.getVelocity()), timestampNow);
+    }
+
+    // Optional: Reset encoder position
+    @Override
+    public void setPosition(double positionRad) {
+        resetEncoderValueRad = positionRad - Units.rotationsToRadians(encoder.getPosition());
+    }
+}
