@@ -20,9 +20,7 @@ public class SwerveModule {
     }
 
     public static double wrapRad(double rad) {
-        while (rad > Math.PI) rad -= 2.0 * Math.PI;
-        while (rad < -Math.PI) rad += 2.0 * Math.PI;
-        return rad;
+        return Math.atan2(Math.sin(rad), Math.cos(rad));
     }
 
     public static SwerveState optimize(double desiredSpeedMps, double desiredAngleRad, double currentAngleRad) {
