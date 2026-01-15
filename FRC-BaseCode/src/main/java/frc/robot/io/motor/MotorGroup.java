@@ -6,9 +6,21 @@ import frc.robot.io.motor.MotorIO.MotorIOValues;
 
 public class MotorGroup {
     private List<MotorIO> motors;
+    private int leaderIndex;
+    private boolean leaderOnlyOutputs;
 
     public MotorGroup(List<MotorIO> motors) {
+        this(motors, 0, false);
+    }
+
+    public MotorGroup(List<MotorIO> motors, int leaderIndex, boolean leaderOnlyOutputs) {
         this.motors = motors;
+        this.leaderIndex = leaderIndex;
+        this.leaderOnlyOutputs = leaderOnlyOutputs;
+    }
+
+    private MotorIO leader() {
+        return motors.get(leaderIndex);
     }
 
     public void updateInputs(List<MotorIOValues> motorValues) {
@@ -31,52 +43,36 @@ public class MotorGroup {
             motors.get(i).updateInputs(motorValues.get(i));
         }
     }
+
+
+    public void setVoltage(double volts) {
+        if (leaderOnlyOutputs) leader().setVoltage(volts);
+        else for (var m: motors) m.setVoltage(volts);
+    }
+
+    public void setVelocityRadPerSec(double radPerSec, double ffVolts) {
+        if (leaderOnlyOutputs) leader().setVelocityRadPerSec(radPerSec, ffVolts);
+        else for (var m : motors) m.setVelocityRadPerSec(radPerSec, ffVolts);
+    }
+
+    public void setPositionRad(double posRad, double ffVolts) {
+        if (leaderOnlyOutputs) leader().setPositionRad(posRad, ffVolts);
+        else for (var m : motors) m.setPositionRad(posRad, ffVolts);
+    }
+
+    public void stop() {
+        if (leaderOnlyOutputs) leader().stop();
+        else for (var m : motors) m.stop();
+    }
     
 
-    public void setSingularMotorVelocity(double velocity, int index) {
-        motors.get(index).setVelocity(velocity);
-    }
+    
 
-    public void setSingularMotorVoltage(double volts, int index) {
-        motors.get(index).setVoltage(volts);
-    }
-
-    public void stopSingularMotor(int index) {
-        motors.get(index).stop();
-    }
-
-    public void setAllVelocity(double velocity) {
-        for (MotorIO motor : motors) {
-            motor.setVelocity(velocity);
-        }
-    }
-
-    public void setAllVoltage(double volts) {
-        for (MotorIO motor : motors) {
-            motor.setVoltage(volts);
-        }
-    }
-
-    public void stopAll() {
-        for (MotorIO motor : motors) {
-            motor.stop();
-        }
-    }
-
-    // Synchronize motor velocities to ensure they all start/stop at the same time
     /**
-     * 
-     * @param velocityToSync sync all motors to the same velocity
-     * Most commonly will run like
-     * synchronizeMotors(motorValues.get(index).encoderValues.velocity)
-     * This will sync all motors to the velocity of the motor from the motor values. If
-     * you don't do this then it is basically the same as setAllVelocity(velocityToSync)
-     * 
-     * This does the same as setAllVelocity(velocity)
+     * Gets the ammount of motors in the group
+     * @return the number of motors
      */
-    public void synchronizeMotors(double velocityToSync) {
-        for (MotorIO motor : motors) {
-            motor.setVelocity(velocityToSync);
-        }
+    public int getSize() {
+        return motors.size();
     }
 }

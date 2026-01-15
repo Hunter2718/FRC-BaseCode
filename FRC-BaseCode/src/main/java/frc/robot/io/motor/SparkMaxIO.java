@@ -1,16 +1,23 @@
 package frc.robot.io.motor;
 
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
-
 import edu.wpi.first.wpilibj.Timer;
 
 public class SparkMaxIO implements MotorIO {
 
     private SparkMax sparkMaxMotor; // Motor controller instance
+    private SparkClosedLoopController cl;
+    private RelativeEncoder relEnc;
 
     // Constructor to initialize SparkMaxIO with the motor
     public SparkMaxIO(SparkMax motor) {
         this.sparkMaxMotor = motor;
+        this.cl = this.sparkMaxMotor.getClosedLoopController();
+        this.relEnc = this.sparkMaxMotor.getEncoder();
     }
 
     /**
@@ -25,16 +32,14 @@ public class SparkMaxIO implements MotorIO {
         inputs.appliedVoltage.update(sparkMaxMotor.getAppliedOutput() * sparkMaxMotor.getBusVoltage(), timestampNow);
         inputs.currentAmps.update(sparkMaxMotor.getOutputCurrent(), timestampNow);
         inputs.tempCelsius.update(sparkMaxMotor.getMotorTemperature(), timestampNow);
+
+        inputs.positionRad.update(relEnc.getPosition() * 2.0 * Math.PI, timestampNow);
+        inputs.velocityRadPerSec.update(relEnc.getVelocity() * (2.0 * Math.PI / 60.0), timestampNow);
     }
 
-    /**
-     * Run the motor with internal velocity control (closed-loop).
-     * 
-     * @param velocity - Desired velocity in RPM or other units like % speed for Spark, SparkMax, SparkFlex
-     */
     @Override
-    public void setVelocity(double velocity) {
-        sparkMaxMotor.set(velocity);  // Set the motor speed (closed-loop)
+    public void setSpeed(double speed) {
+        sparkMaxMotor.set(speed);  // Set the motor speed (closed-loop)
     }
 
     /**
@@ -53,5 +58,43 @@ public class SparkMaxIO implements MotorIO {
     @Override
     public void stop() {
         sparkMaxMotor.stopMotor();
+    }
+
+
+
+    // Closed loop sutff
+    @Override
+    public boolean supportsVelocityClosedLoop() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsPositionClosedLoop() {
+        return true;
+    }
+
+
+    @Override
+    public void setVelocityRadPerSec(double motorRadPerSec, double ffVolts) {
+        double rpm = motorRadPerSec * 60 / (2.0 * Math.PI);
+        cl.setSetpoint(
+            rpm,
+            SparkBase.ControlType.kVelocity,
+            ClosedLoopSlot.kSlot0,
+            ffVolts,
+            SparkClosedLoopController.ArbFFUnits.kVoltage
+        );
+    }
+
+    @Override
+    public void setPositionRad(double motorPosRad, double ffVolts) {
+        double rotations = motorPosRad / (2.0 * Math.PI);
+        cl.setSetpoint(
+            rotations,
+            SparkBase.ControlType.kPosition,
+            ClosedLoopSlot.kSlot0,
+            ffVolts,
+            SparkClosedLoopController.ArbFFUnits.kVoltage
+        );
     }
 }

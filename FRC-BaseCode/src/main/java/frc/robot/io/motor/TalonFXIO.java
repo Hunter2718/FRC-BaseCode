@@ -1,15 +1,21 @@
 package frc.robot.io.motor;
 
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.Timer;
 
 public class TalonFXIO implements MotorIO {
     private TalonFX motor; // Motor controller instance
+    private VelocityVoltage velReq;
+    private PositionVoltage posReq;
 
     // Constructor to initialize SparkMaxIO with the motor
     public TalonFXIO(TalonFX motor) {
         this.motor = motor;
+        this.velReq = new VelocityVoltage(0.0);
+        this.posReq = new PositionVoltage(0.0);
     }
 
     /**
@@ -24,16 +30,14 @@ public class TalonFXIO implements MotorIO {
         inputs.appliedVoltage.update(motor.getMotorVoltage().getValueAsDouble(), timestampNow);
         inputs.currentAmps.update(motor.getSupplyCurrent().getValueAsDouble(), timestampNow);
         inputs.tempCelsius.update(motor.getDeviceTemp().getValueAsDouble(), timestampNow);
+
+        inputs.positionRad.update(motor.getPosition().getValueAsDouble() * 2.0 * Math.PI, timestampNow);
+        inputs.velocityRadPerSec.update(motor.getVelocity().getValueAsDouble() * 2.0 * Math.PI, timestampNow);
     }
 
-    /**
-     * Run the motor with internal velocity control (closed-loop).
-     * 
-     * @param velocity - Desired velocity in RPM or other units
-     */
     @Override
-    public void setVelocity(double velocity) {
-        motor.set(velocity);  // Set the motor speed (closed-loop)
+    public void setSpeed(double speed) {
+        motor.set(speed);  // Set the motor speed (closed-loop)
     }
 
     /**
@@ -52,5 +56,30 @@ public class TalonFXIO implements MotorIO {
     @Override
     public void stop() {
         motor.stopMotor();
+    }
+
+
+
+    // Closed loop stuff
+    @Override
+    public boolean supportsVelocityClosedLoop() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsPositionClosedLoop() {
+        return true;
+    }
+
+    @Override
+    public void setVelocityRadPerSec(double motorRadPerSec, double ffVolts) {
+        double rps = motorRadPerSec / (2.0 * Math.PI);
+        motor.setControl(velReq.withVelocity(rps).withFeedForward(ffVolts));
+    }
+
+    @Override
+    public void setPositionRad(double motorPosRad, double ffVolts) {
+        double rotations = motorPosRad / (2.0 * Math.PI);
+        motor.setControl(posReq.withPosition(rotations).withFeedForward(ffVolts));
     }
 }

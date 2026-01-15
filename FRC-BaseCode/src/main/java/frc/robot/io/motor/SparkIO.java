@@ -24,14 +24,10 @@ public class SparkIO implements MotorIO {
         inputs.appliedVoltage.update(motor.getVoltage(), timestampNow);
     }
 
-    /**
-     * Run the motor with internal velocity control (closed-loop).
-     * 
-     * @param velocity - Desired velocity in RPM or other units like % speed for Spark, SparkMax, SparkFlex
-     */
+
     @Override
-    public void setVelocity(double velocity) {
-        motor.set(velocity);  // Set the motor speed (closed-loop)
+    public void setSpeed(double speed) {
+        motor.set(speed);  // Set the motor speed (closed-loop)
     }
 
     /**
@@ -52,5 +48,16 @@ public class SparkIO implements MotorIO {
     @Override
     public void stop() {
         motor.stopMotor();
+    }
+
+
+    @Override
+    public boolean supportsPositionClosedLoop() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsVelocityClosedLoop() {
+        return false;
     }
 }
