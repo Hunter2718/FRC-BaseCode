@@ -104,9 +104,6 @@ public class SwerveModule {
      * @param desiredState Desired state with speed and angle.
      */
     public void setDesiredState(SwerveModuleState desiredState) {
-        // Ensure sensor values are fresh
-        update();
-
         // 1) Apply chassis angular offset (REV template behavior)
         SwerveModuleState corrected = new SwerveModuleState(
             desiredState.speedMetersPerSecond,

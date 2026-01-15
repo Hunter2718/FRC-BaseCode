@@ -41,6 +41,20 @@ public class DriveSubsystemConstants {
         public static final int kRearRightTurningCanId = 16;
 
         public static final boolean kGyroReversed = false;
+
+        public static final double kTeleopSlowMultiplier = 0.35;
+        public static final double kTeleopNormalMultiplier = 0.70;
+        public static final double kTeleopFastMultiplier = 1.00;
+
+        public enum SpeedMode {
+            SLOW,
+            NORMAL,
+            FAST
+        }
+
+        public static final double kXSlewRateLimiterValue = 4.0;
+        public static final double kYSlewRateLimiterValue = 4.0;
+        public static final double kRotSlewRateLimiterValue = 6.0;
     }
 
 

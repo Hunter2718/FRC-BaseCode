@@ -27,15 +27,7 @@ public class DriveSubsystem extends SubsystemBase {
     private GryoIOValues m_gryoValues;
 
     // Odometry class for tracking robot pose
-    SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
-        DriveConstants.kDriveKinematics,
-        Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        });
+    SwerveDriveOdometry m_odometry;
 
     /** Creates a new DriveSubsystem. */
     public DriveSubsystem(
@@ -56,6 +48,24 @@ public class DriveSubsystem extends SubsystemBase {
         
         this.m_gyro = gryo;
         this.m_gryoValues = gryoValues;
+
+        // get init values
+        this.m_gyro.updateInputs(gryoValues);
+        this.m_frontLeft.update();
+        this.m_frontRight.update();
+        this.m_rearLeft.update();
+        this.m_rearRight.update();
+
+
+        this.m_odometry = new SwerveDriveOdometry(
+        DriveConstants.kDriveKinematics,
+        Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
+        new SwerveModulePosition[] {
+            m_frontLeft.getPosition(),
+            m_frontRight.getPosition(),
+            m_rearLeft.getPosition(),
+            m_rearRight.getPosition()
+        });
     }
 
     @Override

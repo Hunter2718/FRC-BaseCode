@@ -1,6 +1,6 @@
 package frc.robot.io.gryo;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -15,10 +15,7 @@ public interface GryoIO {
                 0
             );
         
-        public List<TimestampedValue<Rotation3d>> pastOdometryPositions = 
-            Arrays.asList(
-                new TimestampedValue<>(new Rotation3d(0.0, 0.0, 0.0), 0)
-            );
+        public List<TimestampedValue<Rotation3d>> pastOdometryPositions = new ArrayList<>();
 
 
         public TimestampedValue<Double> velocityYawRadPerSec = new TimestampedValue<>(0.0, 0); //radians/second
