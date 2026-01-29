@@ -1,20 +1,31 @@
 package frc.robot.subsystems.drive;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.io.gryo.GryoIO;
 import frc.robot.io.gryo.GryoIO.GryoIOValues;
+import frc.robot.io.vision.VisionIO.VisionPoseMeasurement;
 import frc.robot.subsystems.drive.DriveSubsystemConstants.DriveConstants;
+import frc.robot.subsystems.vision.VisionSubsystemConstants;
 
 public class DriveSubsystem extends SubsystemBase {
     private SwerveModule m_frontLeft;
@@ -27,7 +38,7 @@ public class DriveSubsystem extends SubsystemBase {
     private GryoIOValues m_gryoValues;
 
     // Odometry class for tracking robot pose
-    SwerveDriveOdometry m_odometry;
+    private SwerveDrivePoseEstimator m_poseEstimator;
 
     /** Creates a new DriveSubsystem. */
     public DriveSubsystem(
@@ -57,7 +68,7 @@ public class DriveSubsystem extends SubsystemBase {
         this.m_rearRight.update();
 
 
-        this.m_odometry = new SwerveDriveOdometry(
+        this.m_poseEstimator = new SwerveDrivePoseEstimator(
         DriveConstants.kDriveKinematics,
         Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
         new SwerveModulePosition[] {
@@ -65,7 +76,45 @@ public class DriveSubsystem extends SubsystemBase {
             m_frontRight.getPosition(),
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
-        });
+        },
+            new Pose2d() //init pose
+        );
+
+        // Load the RobotConfig from the GUI settings. You should probably
+        // store this in your Constants file
+        RobotConfig config;
+        try{
+            config = RobotConfig.fromGUISettings();
+
+            // Configure AutoBuilder last
+            AutoBuilder.configure(
+                    this::getPose, // Robot pose supplier
+                    this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+                    this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                    (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+                    new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                            new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                            new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                    ),
+                    config, // The robot configuration
+                    () -> {
+                    // Boolean supplier that controls when the path will be mirrored for the red alliance
+                    // This will flip the path being followed to the red side of the field.
+                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                    }
+                    return false;
+                    },
+                    this // Reference to this subsystem to set requirements
+            );
+
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -79,15 +128,48 @@ public class DriveSubsystem extends SubsystemBase {
         // Update gryo values
         m_gyro.updateInputs(m_gryoValues);
 
-        // Update the odometry in the periodic block
-        m_odometry.update(
-            Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
-            new SwerveModulePosition[] {
-                m_frontLeft.getPosition(),
-                m_frontRight.getPosition(),
-                m_rearLeft.getPosition(),
-                m_rearRight.getPosition()
-            });
+        // Update the odometry in the periodic block if robot is stable
+        if(Math.abs(m_gryoValues.position.value.getX()) < VisionSubsystemConstants.kMaxRollRadForFusion &&
+            Math.abs(m_gryoValues.position.value.getY()) < VisionSubsystemConstants.kMaxPitchRadForFusion
+        ) {
+            m_poseEstimator.updateWithTime(
+                Timer.getFPGATimestamp(),
+                Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
+                new SwerveModulePosition[] {
+                    m_frontLeft.getPosition(),
+                    m_frontRight.getPosition(),
+                    m_rearLeft.getPosition(),
+                    m_rearRight.getPosition()
+                }
+            );
+        }
+    }
+
+    public Command pathfindToPose(Pose2d target) {
+        PathConstraints constraints = new PathConstraints(
+            DriveSubsystemConstants.AutoConstants.kMaxSpeedMetersPerSecond,
+            DriveSubsystemConstants.AutoConstants.kMaxAccelerationMetersPerSecondSquared,          // max vel m/s, max accel m/s^2
+            DriveSubsystemConstants.AutoConstants.kMaxAngularSpeedRadiansPerSecond,
+            DriveSubsystemConstants.AutoConstants.kMaxAngularSpeedRadiansPerSecondSquared, // max ang vel rad/s, max ang accel rad/s^2
+            12.0,
+            false
+        );
+
+        return AutoBuilder.pathfindToPose(target, constraints, 0.0);
+    }
+
+    public ChassisSpeeds getRobotRelativeSpeeds() {
+        return DriveConstants.kDriveKinematics.toChassisSpeeds(
+            m_frontLeft.getState(),
+            m_frontRight.getState(),
+            m_rearLeft.getState(),
+            m_rearRight.getState()
+        );
+    }
+
+    public void driveRobotRelative(ChassisSpeeds speeds) {
+        SwerveModuleState[] states = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+        setModuleStates(states);
     }
 
     /**
@@ -96,7 +178,7 @@ public class DriveSubsystem extends SubsystemBase {
      * @return The pose.
      */
     public Pose2d getPose() {
-        return m_odometry.getPoseMeters();
+        return m_poseEstimator.getEstimatedPosition();
     }
 
     /**
@@ -104,8 +186,8 @@ public class DriveSubsystem extends SubsystemBase {
      *
      * @param pose The pose to which to set the odometry.
      */
-    public void resetOdometry(Pose2d pose) {
-        m_odometry.resetPosition(
+    public void resetPose(Pose2d pose) {
+        m_poseEstimator.resetPosition(
             Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
             new SwerveModulePosition[] {
                 m_frontLeft.getPosition(),
@@ -113,7 +195,12 @@ public class DriveSubsystem extends SubsystemBase {
                 m_rearLeft.getPosition(),
                 m_rearRight.getPosition()
             },
-            pose);
+            pose
+        );
+    }
+
+    public void addVisionMeasurement(VisionPoseMeasurement m) {
+        m_poseEstimator.addVisionMeasurement(m.pose(), m.timestampSeconds(), m.stdDevs());
     }
 
     /**
@@ -184,7 +271,7 @@ public class DriveSubsystem extends SubsystemBase {
     /**
      * Returns the heading of the robot.
      *
-     * @return the robot's heading in degrees, in Rotation3d
+     * @return
      */
     public Rotation3d getHeading() {
         return m_gryoValues.position.value;

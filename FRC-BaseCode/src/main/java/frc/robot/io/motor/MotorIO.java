@@ -11,14 +11,14 @@ public interface MotorIO {
 
     /** Container for all motor inputs & sensor values. */
     public class MotorIOValues {
-        public MotorIOValues() {}
+      public MotorIOValues() {}
 
-        public TimestampedValue<Double> appliedVoltage = new TimestampedValue<>(0.0, 0); // volts
-        public TimestampedValue<Double> currentAmps = new TimestampedValue<>(0.0, 0);    // amps
-        public TimestampedValue<Double> tempCelsius = new TimestampedValue<>(0.0, 0);    // degrees Celsius
+      public TimestampedValue<Double> appliedVoltage = new TimestampedValue<>(0.0, 0); // volts
+      public TimestampedValue<Double> currentAmps = new TimestampedValue<>(0.0, 0);    // amps
+      public TimestampedValue<Double> tempCelsius = new TimestampedValue<>(0.0, 0);    // degrees Celsius
 
-        public TimestampedValue<Double> positionRad = new TimestampedValue<Double>(0.0, 0);
-        public TimestampedValue<Double> velocityRadPerSec = new TimestampedValue<Double>(0.0, 0);
+      public TimestampedValue<Double> positionRad = new TimestampedValue<Double>(0.0, 0);
+      public TimestampedValue<Double> velocityRadPerSec = new TimestampedValue<Double>(0.0, 0);
     }
 
     /**

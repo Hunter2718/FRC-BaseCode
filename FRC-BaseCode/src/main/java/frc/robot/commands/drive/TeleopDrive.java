@@ -2,10 +2,8 @@ package frc.robot.commands.drive;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.InputConstants;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystemConstants;
 import frc.robot.subsystems.drive.DriveSubsystemConstants.DriveConstants.SpeedMode;
@@ -28,7 +26,7 @@ public class TeleopDrive extends Command {
 
 
     public TeleopDrive(
-        DriveSubsystem drive,
+        DriveSubsystem m_drive,
         Supplier<Double> xSup,
         Supplier<Double> ySup,
         Supplier<Double> rotSup,
@@ -37,7 +35,7 @@ public class TeleopDrive extends Command {
         Supplier<Boolean> fastSup
     ) {
 
-        this.m_drive = drive;
+        this.m_drive = m_drive;
         this.xSup = xSup;
         this.ySup = ySup;
         this.rotSup = rotSup;
@@ -45,11 +43,11 @@ public class TeleopDrive extends Command {
         this.slowSup = slowSup;
         this.fastSup = fastSup;
 
-        this.xLimiter = new SlewRateLimiter(4.0);
-        this.yLimiter = new SlewRateLimiter(4.0);
-        this.rotLimiter = new SlewRateLimiter(6.0);
+        this.xLimiter = new SlewRateLimiter(DriveSubsystemConstants.DriveConstants.kXSlewRateLimiterValue);
+        this.yLimiter = new SlewRateLimiter(DriveSubsystemConstants.DriveConstants.kYSlewRateLimiterValue);
+        this.rotLimiter = new SlewRateLimiter(DriveSubsystemConstants.DriveConstants.kRotSlewRateLimiterValue);
 
-        addRequirements(drive);
+        addRequirements(m_drive);
     }
 
 
@@ -68,9 +66,9 @@ public class TeleopDrive extends Command {
 
     @Override
     public void execute() {
-        double x = MathUtil.applyDeadband(xSup.get(), InputConstants.kDriverControllerStickDeadband);
-        double y = MathUtil.applyDeadband(ySup.get(), InputConstants.kDriverControllerStickDeadband);
-        double rot = MathUtil.applyDeadband(rotSup.get(), InputConstants.kDriverControllerStickDeadband);
+        double x = xSup.get();
+        double y = ySup.get();
+        double rot = rotSup.get();
 
         // Square inputs for finer low-speed control while keeping sign
         x = Math.copySign(x * x, x);

@@ -65,7 +65,7 @@ public class DriveSubsystemConstants {
         public static final int kDrivingMotorPinionTeeth = 14;
 
         // Calculations required for driving motor conversion factors and feed forward
-        public static final double kDrivingMotorFreeSpeedRps = NeoMotorConstants.kFreeSpeedRpm / 60;
+        public static final double kDrivingMotorFreeSpeedRps = MotorConstants.kFreeSpeedRpm / 60;
         public static final double kWheelDiameterMeters = 0.0762;
         public static final double kWheelRadiusM = kWheelDiameterMeters / 2.0;
         public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
@@ -95,7 +95,7 @@ public class DriveSubsystemConstants {
             kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     }
 
-    public static final class NeoMotorConstants {
+    public static final class MotorConstants {
         public static final double kFreeSpeedRpm = 5676;
     }
 }
