@@ -1,6 +1,10 @@
 package frc.robot.subsystems.flyWheel;
 
 public class FlyWheelSubsystemConstants {
+    // Ports
+    public static final int kIntakeMotorPort = 9;
+    public static final int kShooterMotorPort = 10;
+
     // If your sensor is on the motor but you want wheel rad/s, use motorRot / wheelRot.
     public static final double kIntakeGearRatio = 1.0;
     public static final double kShooterGearRatio = 1.0;

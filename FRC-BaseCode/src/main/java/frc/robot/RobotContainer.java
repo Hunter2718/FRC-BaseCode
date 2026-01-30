@@ -114,36 +114,36 @@ public class RobotContainer {
     // Build Drive
     // Turn Motors
     // Front Left
-    driveFLTurnSparkMax = new SparkMax(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+    driveFLTurnSparkMax = new SparkMax(DriveSubsystemConstants.DriveConstants.kFrontLeftTurningCanId, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     driveFLTurnSparkMax.configure(RevConfigs.MAXSwerveModule.turningConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     // Front Right
-    driveFRTurnSparkMax = new SparkMax(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+    driveFRTurnSparkMax = new SparkMax(DriveSubsystemConstants.DriveConstants.kFrontRightTurningCanId, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     driveFRTurnSparkMax.configure(RevConfigs.MAXSwerveModule.turningConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     // Rear Left
-    driveRLTurnSparkMax = new SparkMax(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+    driveRLTurnSparkMax = new SparkMax(DriveSubsystemConstants.DriveConstants.kRearLeftTurningCanId, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     driveRLTurnSparkMax.configure(RevConfigs.MAXSwerveModule.turningConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     // Rear Right
-    driveRRTurnSparkMax = new SparkMax(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+    driveRRTurnSparkMax = new SparkMax(DriveSubsystemConstants.DriveConstants.kRearRightTurningCanId, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     driveRRTurnSparkMax.configure(RevConfigs.MAXSwerveModule.turningConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     // Drive Motors
     // Front Left
-    driveFLDriveFlex = new SparkFlex(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+    driveFLDriveFlex = new SparkFlex(DriveSubsystemConstants.DriveConstants.kFrontLeftDrivingCanId, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     driveFLDriveFlex.configure(RevConfigs.MAXSwerveModule.drivingConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     // Front Right
-    driveFRDriveFlex = new SparkFlex(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+    driveFRDriveFlex = new SparkFlex(DriveSubsystemConstants.DriveConstants.kFrontRightDrivingCanId, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     driveFRDriveFlex.configure(RevConfigs.MAXSwerveModule.drivingConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     // Rear Left
-    driveRLDriveFlex = new SparkFlex(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+    driveRLDriveFlex = new SparkFlex(DriveSubsystemConstants.DriveConstants.kRearLeftDrivingCanId, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     driveRLDriveFlex.configure(RevConfigs.MAXSwerveModule.drivingConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     // Rear Right
-    driveRRDriveFlex = new SparkFlex(0, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
+    driveRRDriveFlex = new SparkFlex(DriveSubsystemConstants.DriveConstants.kRearRightDrivingCanId, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     driveRRDriveFlex.configure(RevConfigs.MAXSwerveModule.drivingConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     // Modules
@@ -335,7 +335,7 @@ public class RobotContainer {
 
 
     // Intake
-    intakeSparkMax = new SparkMax(0, null);
+    intakeSparkMax = new SparkMax(FlyWheelSubsystemConstants.kIntakeMotorPort, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     intakeSparkMax.configure(RevConfigs.Intake.intakeConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     m_intake = new FlyWheelSubsystem(
@@ -360,7 +360,7 @@ public class RobotContainer {
     
 
     // Intake Pivot Joint
-    intakePivotJointSparkMax = new SparkMax(0, null);
+    intakePivotJointSparkMax = new SparkMax(PositionPieceSubsystemConstants.kIntakePivotJointMotorPort, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     intakePivotJointSparkMax.configure(RevConfigs.Intake.intakePivotJointConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     m_intakePivotJoint = new PositionPieceSubsystem(
@@ -397,7 +397,7 @@ public class RobotContainer {
 
 
     // Shooter
-    shooterFlex = new SparkFlex(0, null);
+    shooterFlex = new SparkFlex(FlyWheelSubsystemConstants.kShooterMotorPort, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     shooterFlex.configure(RevConfigs.TurretShooter.shooterConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     m_shooter = new FlyWheelSubsystem(
@@ -422,7 +422,7 @@ public class RobotContainer {
 
 
     // Turret
-    turretSparkMax = new SparkMax(0, null);
+    turretSparkMax = new SparkMax(PositionPieceSubsystemConstants.kTurretMotorPort, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
     turretSparkMax.configure(RevConfigs.TurretShooter.turretConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
     m_turret = new PositionPieceSubsystem(

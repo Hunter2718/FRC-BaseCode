@@ -1,6 +1,10 @@
 package frc.robot.subsystems.positionPiece;
 
 public class PositionPieceSubsystemConstants {
+  // Ports
+  public static final int kTurretMotorPort = 10;
+  public static final int kIntakePivotJointMotorPort = 12;
+
   // If you command motor position loops, you need joint->motor mapping.
   // motor Rad per piece Rad
   public static final double kTurretGearRatio = 100.0; // placeholder
