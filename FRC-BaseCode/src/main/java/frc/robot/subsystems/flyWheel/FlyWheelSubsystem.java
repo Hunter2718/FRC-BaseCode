@@ -1,5 +1,6 @@
 package frc.robot.subsystems.flyWheel;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,28 +25,27 @@ public class FlyWheelSubsystem extends SubsystemBase {
 
     public FlyWheelSubsystem(
         MotorGroup motors,
-        List<MotorIOValues> motorsValues,
         double gearRatio,
         double ffVolts,
         double atSpeedToleranceRadPerSec
     ) {
-        this(motors, Collections.emptyList(), motorsValues, Collections.emptyList(), gearRatio, ffVolts, atSpeedToleranceRadPerSec);
+        this(motors, null, gearRatio, ffVolts, atSpeedToleranceRadPerSec);
     }
 
     public FlyWheelSubsystem(
         MotorGroup motors,
         List<EncoderIO> encoders,
-        List<MotorIOValues> motorsValues,
-        List<EncoderIOValues> encodersValues,
         double gearRatio,
         double ffVolts,
         double atSpeedToleranceRadPerSec
     ) {
         this.motors = motors;
         this.encoders = (encoders != null) ? encoders : Collections.emptyList();
-        this.motorsValues = motorsValues;
-        this.encodersValues = (encodersValues != null) ? encodersValues : Collections.emptyList();
+        this.motorsValues = new ArrayList<>(motors.getSize());
+        this.encodersValues = new ArrayList<>(encoders.size());
         this.gearRatio = gearRatio;
+        this.ffVolts = ffVolts;
+        this.atSpeedToleranceRadPerSec = atSpeedToleranceRadPerSec;
 
         targetWheelRadPerSec = 0.0;
     }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.positionPiece;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,7 +29,6 @@ public class PositionPieceSubsystem extends SubsystemBase {
 
     public PositionPieceSubsystem(
         MotorGroup motors,
-        List<MotorIOValues> motorsValues,
         double gearRatio,
         double manualMaxVolts,
         double minPieceRad,
@@ -36,14 +36,12 @@ public class PositionPieceSubsystem extends SubsystemBase {
         double ffVolts,
         double atGoalToleranceRad
     ) {
-        this(motors, Collections.emptyList(), motorsValues, Collections.emptyList(), gearRatio, manualMaxVolts, minPieceRad, maxPieceRad, ffVolts, atGoalToleranceRad);
+        this(motors, null, gearRatio, manualMaxVolts, minPieceRad, maxPieceRad, ffVolts, atGoalToleranceRad);
     }
 
     public PositionPieceSubsystem(
         MotorGroup motors,
         List<EncoderIO> encoders,
-        List<MotorIOValues> motorsValues,
-        List<EncoderIOValues> encodersValues,
         double gearRatio,
         double manualMaxVolts,
         double minPieceRad,
@@ -53,8 +51,8 @@ public class PositionPieceSubsystem extends SubsystemBase {
     ) {
         this.motors = motors;
         this.encoders = (encoders != null) ? encoders : Collections.emptyList();
-        this.motorsValues = motorsValues;
-        this.encodersValues = (encodersValues != null) ? encodersValues : Collections.emptyList();
+        this.motorsValues = new ArrayList<>(motors.getSize());
+        this.encodersValues = new ArrayList<>(encoders.size());
 
         this.gearRatio = gearRatio;
         this.manualMaxVolts = manualMaxVolts;
@@ -115,11 +113,6 @@ public class PositionPieceSubsystem extends SubsystemBase {
     }
 
     public void setManualVolts(double volts) {
-        // Soft limit protection
-        if ((volts < 0) || (volts > 0)) {
-            volts = 0.0;
-        }
-
         volts = MathUtil.clamp(volts, -manualMaxVolts, manualMaxVolts);
         motors.setVoltage(volts);
     }

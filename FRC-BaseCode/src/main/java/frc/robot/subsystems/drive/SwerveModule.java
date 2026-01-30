@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,19 +30,15 @@ public class SwerveModule {
         MotorGroup turningMotors,
         EncoderIO drivingEncoder,
         EncoderIO turningEncoder,
-        double chassisAngularOffset,
-        List<MotorIOValues> drivingMotorValues,
-        List<MotorIOValues> turningMotorValues,
-        EncoderIOValues drivingEncoderValues,
-        EncoderIOValues turningEncoderValues
+        double chassisAngularOffset
     ) {
         this.m_drivingMotors = drivingMotors;
         this.m_turningMotors = turningMotors;
 
-        this.drivingMotorValues = drivingMotorValues;
-        this.turningMotorValues = turningMotorValues;
-        this.drivingEncoderValues = drivingEncoderValues;
-        this.turningEncoderValues = turningEncoderValues;
+        this.drivingMotorValues = new ArrayList<>(drivingMotors.getSize());
+        this.turningMotorValues = new ArrayList<>(turningMotors.getSize());
+        this.drivingEncoderValues = new EncoderIOValues();
+        this.turningEncoderValues = new EncoderIOValues();
 
         this.m_drivingEncoder = drivingEncoder;
         this.m_turningEncoder = turningEncoder;

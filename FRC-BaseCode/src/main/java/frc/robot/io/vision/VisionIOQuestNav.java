@@ -35,13 +35,13 @@ public class VisionIOQuestNav implements VisionIO {
         values.poseMeasurements.clear();
         values.hasPose = false;
 
-        // QuestNav docs recommend calling commandPeriodic regularly :contentReference[oaicite:17]{index=17}
+        // QuestNav docs recommend calling commandPeriodic regularly
         questNav.commandPeriodic();
 
         values.connected = questNav.isConnected();
         if (!values.connected) return;
 
-        PoseFrame[] frames = questNav.getAllUnreadPoseFrames(); // unread frames since last call :contentReference[oaicite:18]{index=18}
+        PoseFrame[] frames = questNav.getAllUnreadPoseFrames(); // unread frames since last call
         for (PoseFrame f : frames) {
         if (!f.isTracking()) continue;
 
@@ -49,7 +49,7 @@ public class VisionIOQuestNav implements VisionIO {
         Pose3d robotPose3d = questPose.transformBy(robotToQuest.inverse());
         Pose2d robotPose2d = robotPose3d.toPose2d();
 
-        // dataTimestamp is the timestamp you should use for pose estimator vision updates :contentReference[oaicite:19]{index=19}
+        // dataTimestamp is the timestamp you should use for pose estimator vision updates
         values.poseMeasurements.add(new VisionPoseMeasurement(
             robotPose2d,
             f.dataTimestamp(),

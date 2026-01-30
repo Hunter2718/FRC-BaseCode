@@ -1,8 +1,7 @@
 package frc.robot.io.gryo;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.ArrayDeque;
+import java.util.Deque;
 import edu.wpi.first.math.geometry.Rotation3d;
 import frc.robot.utils.TimestampedValue;
 
@@ -15,7 +14,8 @@ public interface GryoIO {
                 0
             );
         
-        public List<TimestampedValue<Rotation3d>> pastOdometryPositions = new ArrayList<>();
+        public static final double kPastOdomWindowSec = 2.0;
+        public Deque<TimestampedValue<Rotation3d>> pastOdometryPositions = new ArrayDeque<>();
 
 
         public TimestampedValue<Double> velocityYawRadPerSec = new TimestampedValue<>(0.0, 0); //radians/second

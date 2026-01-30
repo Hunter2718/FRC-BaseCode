@@ -40,14 +40,15 @@ public class DriveSubsystem extends SubsystemBase {
     // Odometry class for tracking robot pose
     private SwerveDrivePoseEstimator m_poseEstimator;
 
+    private SwerveModulePosition[] lastStablePositions;
+
     /** Creates a new DriveSubsystem. */
     public DriveSubsystem(
         SwerveModule frontLeftModule,
         SwerveModule frontRighModule,
         SwerveModule rearLeftModule,
         SwerveModule rearRightModule,
-        GryoIO gryo,
-        GryoIOValues gryoValues
+        GryoIO gryo
     ) {
         // Usage reporting for MAXSwerve template
         HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
@@ -58,10 +59,10 @@ public class DriveSubsystem extends SubsystemBase {
         this.m_rearRight = rearRightModule;
         
         this.m_gyro = gryo;
-        this.m_gryoValues = gryoValues;
+        this.m_gryoValues = new GryoIOValues();
 
         // get init values
-        this.m_gyro.updateInputs(gryoValues);
+        this.m_gyro.updateInputs(m_gryoValues);
         this.m_frontLeft.update();
         this.m_frontRight.update();
         this.m_rearLeft.update();
@@ -79,6 +80,11 @@ public class DriveSubsystem extends SubsystemBase {
         },
             new Pose2d() //init pose
         );
+
+        lastStablePositions = new SwerveModulePosition[] {
+            new SwerveModulePosition(), new SwerveModulePosition(),
+            new SwerveModulePosition(), new SwerveModulePosition()
+        };
 
         // Load the RobotConfig from the GUI settings. You should probably
         // store this in your Constants file
@@ -128,21 +134,29 @@ public class DriveSubsystem extends SubsystemBase {
         // Update gryo values
         m_gyro.updateInputs(m_gryoValues);
 
-        // Update the odometry in the periodic block if robot is stable
-        if(Math.abs(m_gryoValues.position.value.getX()) < VisionSubsystemConstants.kMaxRollRadForFusion &&
-            Math.abs(m_gryoValues.position.value.getY()) < VisionSubsystemConstants.kMaxPitchRadForFusion
-        ) {
-            m_poseEstimator.updateWithTime(
-                Timer.getFPGATimestamp(),
-                Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
-                new SwerveModulePosition[] {
-                    m_frontLeft.getPosition(),
-                    m_frontRight.getPosition(),
-                    m_rearLeft.getPosition(),
-                    m_rearRight.getPosition()
-                }
-            );
+        boolean stable = Math.abs(m_gryoValues.position.value.getX()) < VisionSubsystemConstants.kMaxRollRadForFusion && Math.abs(m_gryoValues.position.value.getY()) < VisionSubsystemConstants.kMaxPitchRadForFusion;
+        
+        SwerveModulePosition[] current = new SwerveModulePosition[] {
+            m_frontLeft.getPosition(),
+            m_frontRight.getPosition(),
+            m_rearLeft.getPosition(),
+            m_rearRight.getPosition()
+        };
+
+        SwerveModulePosition[] used = current;
+
+        if(stable) {
+            lastStablePositions = current;
+        } else {
+            used = lastStablePositions;
         }
+
+        // Update the odometry in the periodic block if robot is stable
+        m_poseEstimator.updateWithTime(
+            Timer.getFPGATimestamp(),
+            Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
+            used
+        );
     }
 
     public Command pathfindToPose(Pose2d target) {

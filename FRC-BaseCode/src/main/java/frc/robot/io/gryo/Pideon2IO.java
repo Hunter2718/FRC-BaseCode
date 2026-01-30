@@ -21,14 +21,21 @@ public class Pideon2IO implements GryoIO {
     @Override
     public void updateInputs(GryoIOValues values) {
         double timestampNow = Timer.getFPGATimestamp();
-        values.position.update(pigeon.getRotation3d(), timestampNow);
+        Rotation3d rot = pigeon.getRotation3d();
+        values.position.update(rot, timestampNow);
 
         values.pastOdometryPositions.add(
-            new TimestampedValue<Rotation3d>(pigeon.getRotation3d(), timestampNow)
+            new TimestampedValue<Rotation3d>(rot, timestampNow)
         );
 
+        double cutoff = timestampNow - GryoIOValues.kPastOdomWindowSec;
+        while(!values.pastOdometryPositions.isEmpty()
+            && values.pastOdometryPositions.peekFirst().timestamp < cutoff
+        ) {
+            values.pastOdometryPositions.removeFirst();
+        }
+
         values.velocityYawRadPerSec.update(Units.degreesToRadians(pigeon.getAngularVelocityZWorld().getValueAsDouble()), timestampNow);
-        //TODO: make sure these values are correct possible need to switch X and Y (pitch and roll)
         values.velocityPitchRadPerSec.update(Units.degreesToRadians(pigeon.getAngularVelocityXWorld().getValueAsDouble()), timestampNow);
         values.velocityRollRadPerSec.update(Units.degreesToRadians(pigeon.getAngularVelocityYWorld().getValueAsDouble()), timestampNow);
     }

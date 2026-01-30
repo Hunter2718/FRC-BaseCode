@@ -6,6 +6,7 @@ package frc.robot;
 
 import java.util.List;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 
@@ -15,8 +16,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.PositionPiece.PositionPieceTeleop;
@@ -24,14 +26,11 @@ import frc.robot.commands.drive.TeleopDrive;
 import frc.robot.commands.drive.XWheels;
 import frc.robot.commands.flyWheel.FlyWheelTeleop;
 import frc.robot.io.encoder.AbsoluteEncoderIO;
-import frc.robot.io.encoder.EncoderIO.EncoderIOValues;
 import frc.robot.io.encoder.RelativeEncoderIO;
-import frc.robot.io.gryo.GryoIO.GryoIOValues;
 import frc.robot.io.gryo.Pideon2IO;
 import frc.robot.io.motor.MotorGroup;
 import frc.robot.io.motor.SparkFlexIO;
 import frc.robot.io.motor.SparkMaxIO;
-import frc.robot.io.motor.MotorIO.MotorIOValues;
 import frc.robot.io.vision.VisionIO.VisionIOValues;
 import frc.robot.io.vision.VisionIOLimelight;
 import frc.robot.io.vision.VisionIOLimelight.Mode;
@@ -48,6 +47,8 @@ import frc.robot.subsystems.vision.VisionSubsystemConstants;
 import gg.questnav.questnav.QuestNav;
 
 public class RobotContainer {
+  // Auto Chooser
+  private final SendableChooser<Command> autoChooser;
 
   // Controllers
   private XboxController m_driverController;
@@ -103,6 +104,9 @@ public class RobotContainer {
 
 
   public RobotContainer() {
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
     // Build Gryo
     pigeon2 = new Pigeon2(0);
 
@@ -173,19 +177,7 @@ public class RobotContainer {
         driveFLTurnSparkMax.getAbsoluteEncoder()
       ),
 
-      DriveSubsystemConstants.DriveConstants.kFrontLeftChassisAngularOffset,
-
-      List.of(
-        new MotorIOValues()
-      ),
-
-      List.of(
-        new MotorIOValues()
-      ),
-
-      new EncoderIOValues(),
-
-      new EncoderIOValues()
+      DriveSubsystemConstants.DriveConstants.kFrontLeftChassisAngularOffset
     );
 
 
@@ -219,19 +211,7 @@ public class RobotContainer {
         driveFRTurnSparkMax.getAbsoluteEncoder()
       ),
 
-      DriveSubsystemConstants.DriveConstants.kFrontRightChassisAngularOffset,
-
-      List.of(
-        new MotorIOValues()
-      ),
-
-      List.of(
-        new MotorIOValues()
-      ),
-
-      new EncoderIOValues(),
-
-      new EncoderIOValues()
+      DriveSubsystemConstants.DriveConstants.kFrontRightChassisAngularOffset
     );
 
 
@@ -265,19 +245,7 @@ public class RobotContainer {
         driveRLTurnSparkMax.getAbsoluteEncoder()
       ),
 
-      DriveSubsystemConstants.DriveConstants.kBackLeftChassisAngularOffset,
-
-      List.of(
-        new MotorIOValues()
-      ),
-
-      List.of(
-        new MotorIOValues()
-      ),
-
-      new EncoderIOValues(),
-
-      new EncoderIOValues()
+      DriveSubsystemConstants.DriveConstants.kBackLeftChassisAngularOffset
     );
 
 
@@ -311,19 +279,7 @@ public class RobotContainer {
         driveRRTurnSparkMax.getAbsoluteEncoder()
       ),
 
-      DriveSubsystemConstants.DriveConstants.kBackRightChassisAngularOffset,
-
-      List.of(
-        new MotorIOValues()
-      ),
-
-      List.of(
-        new MotorIOValues()
-      ),
-
-      new EncoderIOValues(),
-
-      new EncoderIOValues()
+      DriveSubsystemConstants.DriveConstants.kBackRightChassisAngularOffset
     );
 
 
@@ -339,10 +295,7 @@ public class RobotContainer {
 
       new Pideon2IO(
         pigeon2
-      ),
-
-      new GryoIOValues()
-
+      )
     );
 
   
@@ -397,17 +350,11 @@ public class RobotContainer {
         true
       ),
 
-      List.of(
-        new MotorIOValues()
-      ),
-
       FlyWheelSubsystemConstants.kIntakeGearRatio,
 
       FlyWheelSubsystemConstants.kIntakeFFVolts,
 
       FlyWheelSubsystemConstants.kIntakeAtSpeedToleranceRadPerSec
-
-
     );
 
     
@@ -434,14 +381,6 @@ public class RobotContainer {
         )
       ),
 
-      List.of(
-        new MotorIOValues()
-      ),
-
-      List.of(
-        new EncoderIOValues()
-      ),
-
       PositionPieceSubsystemConstants.kIntakePivotJointGearRatio,
 
       PositionPieceSubsystemConstants.kIntakePivotJointManualMaxVolts,
@@ -453,7 +392,6 @@ public class RobotContainer {
       PositionPieceSubsystemConstants.kIntakePivotJointFFVolts,
 
       PositionPieceSubsystemConstants.kIntakePivotJointAtGoalToleranceRad
-
     );
 
 
@@ -474,16 +412,11 @@ public class RobotContainer {
         true
       ),
 
-      List.of(
-        new MotorIOValues()
-      ),
-
       FlyWheelSubsystemConstants.kShooterGearRatio,
 
       FlyWheelSubsystemConstants.kShooterFFVolts,
 
       FlyWheelSubsystemConstants.kShooterAtSpeedToleranceRadPerSec
-
     );
 
 
@@ -510,14 +443,6 @@ public class RobotContainer {
         )
       ),
 
-      List.of(
-        new MotorIOValues()
-      ),
-
-      List.of(
-        new EncoderIOValues()
-      ),
-
       PositionPieceSubsystemConstants.kTurretGearRatio,
 
       PositionPieceSubsystemConstants.kTurretManualMaxVolts,
@@ -529,7 +454,6 @@ public class RobotContainer {
       PositionPieceSubsystemConstants.kTurretFFVolts,
 
       PositionPieceSubsystemConstants.kTurretAtGoalToleranceRad
-
     );
 
     
@@ -627,6 +551,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return autoChooser.getSelected();
   }
 }
