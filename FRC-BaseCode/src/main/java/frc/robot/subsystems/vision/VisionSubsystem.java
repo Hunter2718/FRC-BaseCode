@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.io.vision.VisionIO;
 import frc.robot.io.vision.VisionIO.VisionIOValues;
@@ -23,6 +24,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     private boolean questAligned;
     private double lastQuestAlignTime;
+    private String lastRejectReason;
 
     public VisionSubsystem(
         List<VisionIO> ios,
@@ -41,6 +43,7 @@ public class VisionSubsystem extends SubsystemBase {
 
         questAligned = false;
         lastQuestAlignTime = -9999999;
+        lastRejectReason = "";
     }
 
     @Override
@@ -60,15 +63,23 @@ public class VisionSubsystem extends SubsystemBase {
             io.updateInputs(v);
 
             for (VisionPoseMeasurement m : v.poseMeasurements) {
-                if(!stable) continue;
+                if (!stable && (m.source() == VisionSource.LIMELIGHT || m.source() == VisionSource.PHOTONVISION)) {
+                    lastRejectReason = "tilt reject tag vision";
+                    continue;
+                }
 
-                if(!isMeasurementUsable(m)) continue;
+                if(!isMeasurementUsable(m)) {
+                    lastRejectReason = "measurment unusable";
+                    continue;
+                }
 
                 measurementConsumer.accept(m);
 
-                if(shouldAlignQuest(m)) alignAllQuests(currentEstimatedPose.get());
+                if(shouldAlignQuest(m) && stable) alignAllQuests(currentEstimatedPose.get());
             }
         }
+
+        SmartDashboard.putString("Vision/LastReject", lastRejectReason);
     }
 
     public boolean isStable(Rotation3d rot) {
@@ -133,5 +144,9 @@ public class VisionSubsystem extends SubsystemBase {
 
         questAligned = true;
         lastQuestAlignTime = now;
+    }
+
+    public void forceAlignAllQuests(Pose2d pose) {
+        alignAllQuests(pose);
     }
 }

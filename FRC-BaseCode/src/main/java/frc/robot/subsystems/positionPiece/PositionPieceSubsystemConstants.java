@@ -4,11 +4,19 @@ public class PositionPieceSubsystemConstants {
   // Ports
   public static final int kTurretMotorPort = 10;
   public static final int kIntakePivotJointMotorPort = 12;
+  public static final int kTurretTruthEncoderIndex = 0;
+  public static final int kIntakePivotJointTruthEncoderIndex = 0;
+  public static final int kTurretTruthMotorIndex = 0;
+  public static final int kIntakePivotJointTruthMotorIndex = 0;
 
   // If you command motor position loops, you need joint->motor mapping.
   // motor Rad per piece Rad
   public static final double kTurretGearRatio = 100.0; // placeholder
   public static final double kIntakePivotJointGearRatio = 100.0; // placeholder
+
+  // Encoder Rad per Piece Rad
+  public static final double kTurretThruthEncoderGearRatio = 1;
+  public static final double kIntakePivotJointThruthEncoderGearRatio = 1;
 
   // Soft limits (joint angle radians) - placeholders
   public static final double kMinTurretRad = -0.2;
@@ -37,10 +45,4 @@ public class PositionPieceSubsystemConstants {
   public static final double kIntakePivotJointPosOneRad = 0.0;
   public static final double kIntakePivotJointPosTwoRad = 0.6;
   public static final double kIntakePivotJointPosThreeRad = 1.8;
-
-  public static double pieceRadToMotorRad(double goalPieceRad, double currentPieceRad, double currentMotorRad, double gearRatio) {
-    double error = goalPieceRad - currentPieceRad;
-    error = Math.atan2(Math.sin(error), Math.cos(error));
-    return (currentMotorRad + error * gearRatio);
-  }
 }

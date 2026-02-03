@@ -1,21 +1,15 @@
 package frc.robot.subsystems.drive;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.io.encoder.EncoderIO;
 import frc.robot.io.encoder.EncoderIO.EncoderIOValues;
 import frc.robot.io.motor.MotorGroup;
-import frc.robot.io.motor.MotorIO.MotorIOValues;
 
 public class SwerveModule {
     private MotorGroup m_drivingMotors;
     private MotorGroup m_turningMotors;
-    private List<MotorIOValues> drivingMotorValues;
-    private List<MotorIOValues> turningMotorValues;
 
     private EncoderIO m_drivingEncoder;
     private EncoderIO m_turningEncoder;
@@ -35,8 +29,6 @@ public class SwerveModule {
         this.m_drivingMotors = drivingMotors;
         this.m_turningMotors = turningMotors;
 
-        this.drivingMotorValues = new ArrayList<>(drivingMotors.getSize());
-        this.turningMotorValues = new ArrayList<>(turningMotors.getSize());
         this.drivingEncoderValues = new EncoderIOValues();
         this.turningEncoderValues = new EncoderIOValues();
 
@@ -50,8 +42,8 @@ public class SwerveModule {
     }
 
     public void update() {
-        m_drivingMotors.updateInputs(drivingMotorValues);
-        m_turningMotors.updateInputs(turningMotorValues);
+        m_drivingMotors.updateInputs();
+        m_turningMotors.updateInputs();
         m_drivingEncoder.updateInputs(drivingEncoderValues);
         m_turningEncoder.updateInputs(turningEncoderValues);
     }

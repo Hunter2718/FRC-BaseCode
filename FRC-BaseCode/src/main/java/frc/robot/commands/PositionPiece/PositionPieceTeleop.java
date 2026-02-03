@@ -32,8 +32,7 @@ public class PositionPieceTeleop extends Command {
             return;
         }
 
-        //Idle
-        piece.setManualVolts(0.0);
+        piece.stop();
     }
 
     @Override

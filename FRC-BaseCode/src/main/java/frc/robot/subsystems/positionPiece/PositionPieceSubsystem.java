@@ -3,17 +3,15 @@ package frc.robot.subsystems.positionPiece;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.io.encoder.EncoderIO;
 import frc.robot.io.encoder.EncoderIO.EncoderIOValues;
 import frc.robot.io.motor.MotorGroup;
-import frc.robot.io.motor.MotorIO.MotorIOValues;
+import frc.robot.utils.UnitsUtils;
 
 public class PositionPieceSubsystem extends SubsystemBase {
     private MotorGroup motors;
-    private List<MotorIOValues> motorsValues;
     private List<EncoderIO> encoders;
     private List<EncoderIOValues> encodersValues;
 
@@ -25,7 +23,6 @@ public class PositionPieceSubsystem extends SubsystemBase {
     private double maxPieceRad;
     private double ffVolts;
     private double atGoalToleranceRad;
-
 
     public PositionPieceSubsystem(
         MotorGroup motors,
@@ -51,8 +48,7 @@ public class PositionPieceSubsystem extends SubsystemBase {
     ) {
         this.motors = motors;
         this.encoders = (encoders != null) ? encoders : Collections.emptyList();
-        this.motorsValues = new ArrayList<>(motors.getSize());
-        this.encodersValues = new ArrayList<>(encoders.size());
+        this.encodersValues = new ArrayList<>(this.encoders.size());
 
         this.gearRatio = gearRatio;
         this.manualMaxVolts = manualMaxVolts;
@@ -66,21 +62,12 @@ public class PositionPieceSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        motors.updateInputs(motorsValues);
-        
-        int encoderCount = encoders.size();
-        int encodersValuesSize = encodersValues.size();
+        motors.updateInputs();
     
-        // Truncate the motorValues list if it's longer than the motors list
-        if (encodersValuesSize > encoderCount) {
-            encodersValues = encodersValues.subList(0, encoderCount);
-        }
-        // Pad the motorValues list if it's shorter than the motors list
-        else if (encodersValuesSize < encoderCount) {
-            while (encodersValues.size() < encoderCount) {
-                encodersValues.add(new EncoderIOValues());
-            }
-        }
+        // Fix size
+        while (encodersValues.size() < encoders.size()) encodersValues.add(new EncoderIOValues());
+        while (encodersValues.size() > encoders.size()) encodersValues.remove(encodersValues.size() - 1);
+
     
         // Now update inputs based on the resized motorValues list
         for (int i = 0; i < encoders.size(); i++) {
@@ -93,11 +80,11 @@ public class PositionPieceSubsystem extends SubsystemBase {
     }
 
     public double getMotorPositionRad(int index) {
-        return motorsValues.get(index).positionRad.value;
+        return motors.getMotorValues(index).positionRad.value;
     }
 
     public double getMotorVelocityRadPerSec(int index) {
-        return motorsValues.get(index).velocityRadPerSec.value;
+        return motors.getMotorValues(index).velocityRadPerSec.value;
     }
 
     public double getEncoderPositionRad(int index) {
@@ -120,7 +107,7 @@ public class PositionPieceSubsystem extends SubsystemBase {
     public void moveToPositionRad(double endPieceRad, double currentPieceRad, double currentMotorRad) {
         goalPieceRad = MathUtil.clamp(endPieceRad, minPieceRad, maxPieceRad);
 
-        double motorGoalRad = PositionPieceSubsystemConstants.pieceRadToMotorRad(goalPieceRad, currentPieceRad, currentMotorRad, gearRatio);
+        double motorGoalRad = UnitsUtils.pieceRadToMotorRad(goalPieceRad, currentPieceRad, currentMotorRad, gearRatio);
         motors.setPositionRad(motorGoalRad, ffVolts);
     }
 
@@ -128,9 +115,9 @@ public class PositionPieceSubsystem extends SubsystemBase {
         return Math.abs(getEncoderPositionRad(encoderIndex) - goalPieceRad) <= atGoalToleranceRad;
     }
 
-    public int getEncoderCount() { return encodersValues.size(); }
+    public int getEncoderCount() { return encoders.size(); }
 
-    public int getMotorCount() { return motorsValues.size(); }
+    public int getMotorCount() { return motors.getSize(); }
 
 
     public void stop() {

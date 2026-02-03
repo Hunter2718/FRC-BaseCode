@@ -5,26 +5,27 @@
 package frc.robot;
 
 import java.util.List;
+
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.StopAll;
 import frc.robot.commands.PositionPiece.PositionPieceTeleop;
 import frc.robot.commands.drive.TeleopDrive;
 import frc.robot.commands.drive.XWheels;
 import frc.robot.commands.flyWheel.FlyWheelTeleop;
+import frc.robot.commands.vision.AlignQuest;
+import frc.robot.commands.vision.ResetPoseAndAlignQuest;
 import frc.robot.io.encoder.AbsoluteEncoderIO;
 import frc.robot.io.encoder.RelativeEncoderIO;
 import frc.robot.io.gryo.Pideon2IO;
@@ -57,7 +58,7 @@ public class RobotContainer {
 
   // Subsystems
   private DriveSubsystem m_drive;
-  @SuppressWarnings("unused")
+  @SuppressWarnings("Unused")
   private VisionSubsystem m_vision;
   private FlyWheelSubsystem m_intake;
   private PositionPieceSubsystem m_intakePivotJoint;
@@ -108,7 +109,7 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // Build Gryo
-    pigeon2 = new Pigeon2(0);
+    pigeon2 = new Pigeon2(DriveSubsystemConstants.DriveConstants.kGyroPort);
 
 
     // Build Drive
@@ -466,6 +467,7 @@ public class RobotContainer {
     configureBindings();
   }
 
+
   private void configureBindings() {
     // Auto Bindings
     configureAutoCommands();
@@ -523,32 +525,54 @@ public class RobotContainer {
       )
     );
 
+    configureTeleAutoCommands();
+  }
+
+
+  private void configureTeleAutoCommands() {
     // Tle-Auto (button) Bindings
-    new JoystickButton(m_driverController, InputConstants.kDriverControllerButtonXWheels)
+    new JoystickButton(m_driverController, InputConstants.kDriverControllerButtonXWheelsButton)
       .whileTrue(
         new XWheels(m_drive)
       );
 
-    new JoystickButton(m_driverController, InputConstants.kDriverControllerButtonResetOdometry)
+    new JoystickButton(m_buttonBoard, InputConstants.kButtonBoardResetPoseAndAlignQuestButton)
       .onTrue(
-        new InstantCommand(
-          () -> m_drive.resetPose(
-            new Pose2d(
-              m_drive.getPose().getX(),
-              m_drive.getPose().getY(),
-              new Rotation2d(
-                0
-              )
-            )
-          ),
-          m_drive
+        new ResetPoseAndAlignQuest(
+          m_drive,
+          m_vision,
+          m_drive.getPose() // Change to know pose (Ex. start)
+        )
+      );
+
+    new JoystickButton(m_driverController, InputConstants.kDriverControllerButtonForceAlignQuestButton)
+      .onTrue(
+        new AlignQuest(
+          m_vision,
+          m_drive.getPose()
+        )
+      );
+
+    // All the subsystems respective stop functions
+    new JoystickButton(m_buttonBoard, InputConstants.kButtonBoardStopAllButton)
+      .whileTrue(
+        new StopAll(
+          List.of(
+            () -> m_drive.setX(),
+            () -> m_turret.stop(),
+            () -> m_shooter.stop(),
+            () -> m_intake.stop(),
+            () -> m_intakePivotJoint.stop()
+          )
         )
       );
   }
 
+
   private void configureAutoCommands() {
     // Auto Bindings
   }
+
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();

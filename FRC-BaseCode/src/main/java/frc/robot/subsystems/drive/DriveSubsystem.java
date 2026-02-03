@@ -13,6 +13,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -82,8 +83,10 @@ public class DriveSubsystem extends SubsystemBase {
         );
 
         lastStablePositions = new SwerveModulePosition[] {
-            new SwerveModulePosition(), new SwerveModulePosition(),
-            new SwerveModulePosition(), new SwerveModulePosition()
+            m_frontLeft.getPosition(),
+            m_frontRight.getPosition(),
+            m_rearLeft.getPosition(),
+            m_rearRight.getPosition()
         };
 
         // Load the RobotConfig from the GUI settings. You should probably
@@ -103,17 +106,7 @@ public class DriveSubsystem extends SubsystemBase {
                             new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
                     ),
                     config, // The robot configuration
-                    () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red alliance
-                    // This will flip the path being followed to the red side of the field.
-                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                    },
+                    () -> isRedAlliance(),
                     this // Reference to this subsystem to set requirements
             );
 
@@ -134,7 +127,7 @@ public class DriveSubsystem extends SubsystemBase {
         // Update gryo values
         m_gyro.updateInputs(m_gryoValues);
 
-        boolean stable = Math.abs(m_gryoValues.position.value.getX()) < VisionSubsystemConstants.kMaxRollRadForFusion && Math.abs(m_gryoValues.position.value.getY()) < VisionSubsystemConstants.kMaxPitchRadForFusion;
+        boolean stable = Math.abs(m_gryoValues.position.value.getX()) <= VisionSubsystemConstants.kMaxRollRadForFusion && Math.abs(m_gryoValues.position.value.getY()) <= VisionSubsystemConstants.kMaxPitchRadForFusion;
         
         SwerveModulePosition[] current = new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
@@ -157,6 +150,14 @@ public class DriveSubsystem extends SubsystemBase {
             Rotation2d.fromRadians(m_gryoValues.position.value.getZ()),
             used
         );
+    }
+
+    public boolean isRedAlliance() {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
     }
 
     public Command pathfindToPose(Pose2d target) {
@@ -235,7 +236,7 @@ public class DriveSubsystem extends SubsystemBase {
         var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
             fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
-                    Rotation2d.fromRadians(m_gryoValues.position.value.getZ()))
+                    Rotation2d.fromRadians((isRedAlliance() ? m_gryoValues.position.value.getZ() - Math.PI : m_gryoValues.position.value.getZ())))
                 : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
         SwerveDriveKinematics.desaturateWheelSpeeds(
             swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
@@ -300,4 +301,10 @@ public class DriveSubsystem extends SubsystemBase {
         return m_gryoValues.velocityYawRadPerSec.value;
     }
     
+    public Translation2d getFieldRelativeVelocity() {
+        ChassisSpeeds speeds = getRobotRelativeSpeeds();
+        Translation2d vRobot = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+        return vRobot.rotateBy(getHeading().toRotation2d()); // robot -> field
+    }
+
 }

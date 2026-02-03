@@ -8,8 +8,9 @@ public class InputConstants {
     public static final double kDriverControllerTriggerDeadband = 0.25;
 
     // Specific Button Values
-    public static final int kDriverControllerButtonXWheels = XboxController.Button.kX.value;
-    public static final int kDriverControllerButtonResetOdometry = XboxController.Button.kY.value;
+    public static final int kDriverControllerButtonXWheelsButton = XboxController.Button.kX.value;
+    public static final int kDriverControllerButtonForceAlignQuestButton = XboxController.Button.kY.value;
+    public static final int kDriveControllerButtonTurretShooterConstantTrackButton = XboxController.Button.kA.value;
 
 
 
@@ -30,4 +31,6 @@ public class InputConstants {
     // Spicific Button Values
     public static final int kButtonBoardShooterLowButton = 0;
     public static final int kButtonBoardShooterHighButton = 0;
+    public static final int kButtonBoardResetPoseAndAlignQuestButton = 0;
+    public static final int kButtonBoardStopAllButton = 0;
 }

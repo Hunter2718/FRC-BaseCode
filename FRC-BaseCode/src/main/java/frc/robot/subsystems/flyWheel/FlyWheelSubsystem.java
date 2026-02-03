@@ -8,13 +8,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.io.encoder.EncoderIO;
 import frc.robot.io.encoder.EncoderIO.EncoderIOValues;
 import frc.robot.io.motor.MotorGroup;
-import frc.robot.io.motor.MotorIO.MotorIOValues;
+import frc.robot.utils.UnitsUtils;
 
 public class FlyWheelSubsystem extends SubsystemBase {
     private MotorGroup motors;
     private List<EncoderIO> encoders;
 
-    private List<MotorIOValues> motorsValues;
     private List<EncoderIOValues> encodersValues;
 
     private double targetWheelRadPerSec;
@@ -41,8 +40,7 @@ public class FlyWheelSubsystem extends SubsystemBase {
     ) {
         this.motors = motors;
         this.encoders = (encoders != null) ? encoders : Collections.emptyList();
-        this.motorsValues = new ArrayList<>(motors.getSize());
-        this.encodersValues = new ArrayList<>(encoders.size());
+        this.encodersValues = new ArrayList<>(this.encoders.size());
         this.gearRatio = gearRatio;
         this.ffVolts = ffVolts;
         this.atSpeedToleranceRadPerSec = atSpeedToleranceRadPerSec;
@@ -52,21 +50,12 @@ public class FlyWheelSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        motors.updateInputs(motorsValues);
-        
-        int encoderCount = encoders.size();
-        int encodersValuesSize = encodersValues.size();
+        motors.updateInputs();
     
-        // Truncate the motorValues list if it's longer than the motors list
-        if (encodersValuesSize > encoderCount) {
-            encodersValues = encodersValues.subList(0, encoderCount);
-        }
-        // Pad the motorValues list if it's shorter than the motors list
-        else if (encodersValuesSize < encoderCount) {
-            while (encodersValues.size() < encoderCount) {
-                encodersValues.add(new EncoderIOValues());
-            }
-        }
+        // Fix Size
+        while (encodersValues.size() < encoders.size()) encodersValues.add(new EncoderIOValues());
+        while (encodersValues.size() > encoders.size()) encodersValues.remove(encodersValues.size() - 1);
+
     
         // Now update inputs based on the resized motorValues list
         for (int i = 0; i < encoders.size(); i++) {
@@ -79,13 +68,13 @@ public class FlyWheelSubsystem extends SubsystemBase {
     }
 
       /** Motor rad/s (leader assumed index 0). */
-    public double getMotorVelocityRadPerSec() {
-        return motorsValues.get(0).velocityRadPerSec.value;
+    public double getMotorVelocityRadPerSec(int index) {
+        return motors.getMotorValues(index).velocityRadPerSec.value;
     }
 
     /** Motor rad (leader assumed index 0). */
-    public double getMotorPositionRad() {
-        return motorsValues.get(0).positionRad.value;
+    public double getMotorPositionRad(int index) {
+        return motors.getMotorValues(index).positionRad.value;
     }
 
     /** Encoder count (0 if none). */
@@ -103,11 +92,11 @@ public class FlyWheelSubsystem extends SubsystemBase {
         return encodersValues.get(index).positionRad.value;
     }
 
-    public double getWheelVelocityRadPerSec() {
+    public double getWheelVelocityRadPerSec(int motorIndex) {
         // wheel encoder, you can do:
         // if (getEncoderCount() > 0) return getEncoderVelocityRadPerSec(0);
 
-        return getMotorVelocityRadPerSec() / gearRatio;
+        return getMotorVelocityRadPerSec(motorIndex) / gearRatio;
     }
 
     public double getTargetWheelRadPerSec() {
@@ -118,12 +107,12 @@ public class FlyWheelSubsystem extends SubsystemBase {
     public void setTargetWheelRadPerSec(double wheelRadPerSec) {
         targetWheelRadPerSec = wheelRadPerSec;
 
-        double motorRadPerSec = FlyWheelSubsystemConstants.wheelToMotorRadPerSec(wheelRadPerSec, gearRatio);
+        double motorRadPerSec = UnitsUtils.wheelToMotorRadPerSec(wheelRadPerSec, gearRatio);
         motors.setVelocityRadPerSec(motorRadPerSec, ffVolts);
     }
 
-    public boolean atSpeed() {
-        return Math.abs(getWheelVelocityRadPerSec() - targetWheelRadPerSec)
+    public boolean atSpeed(int motorIndex) {
+        return Math.abs(getWheelVelocityRadPerSec(motorIndex) - targetWheelRadPerSec)
             <= atSpeedToleranceRadPerSec;
     }
 

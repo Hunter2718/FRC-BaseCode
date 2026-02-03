@@ -40,6 +40,7 @@ public class DriveSubsystemConstants {
         public static final int kFrontRightTurningCanId = 14;
         public static final int kRearRightTurningCanId = 16;
 
+        public static final int kGyroPort = 18;
         public static final boolean kGyroReversed = false;
 
         public static final double kTeleopSlowMultiplier = 0.35;

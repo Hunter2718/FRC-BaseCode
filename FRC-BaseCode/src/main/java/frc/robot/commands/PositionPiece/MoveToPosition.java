@@ -6,14 +6,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.positionPiece.PositionPieceSubsystem;
 import frc.robot.utils.UnitsUtils;
 
-public class ConstantMoveToPosition extends Command {
+public class MoveToPosition extends Command {
     private PositionPieceSubsystem piece;
     private Supplier<Double> targetRad;
     private int truthEncoderIndex;
     private int truthMotorIndex;
     private double truthEncoderToPieceGearRatio;
 
-    public ConstantMoveToPosition(
+    public MoveToPosition(
         PositionPieceSubsystem piece,
         Supplier<Double> targetRad,
         int truthEncoderIndex,
@@ -40,12 +40,7 @@ public class ConstantMoveToPosition extends Command {
     }
 
     @Override
-    public void end(boolean interrupted) {
-        piece.stop();
-    }
-
-    @Override
     public boolean isFinished() {
-        return false;
+        return piece.atGoal(truthEncoderIndex);
     }
 }

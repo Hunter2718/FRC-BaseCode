@@ -18,11 +18,6 @@ public class FlyWheelSubsystemConstants {
     public static final double kShooterWheelNormalRadPerSec = 350.0;
     public static final double kShooterWheelHighRadPerSec   = 450.0;
 
-    // Convert wheel rad/s -> motor rad/s
-    public static double wheelToMotorRadPerSec(double wheelRadPerSec, double gearRatio) {
-        return wheelRadPerSec * gearRatio;
-    }
-
     // Optional tolerance for "at speed" checks
     public static final double kShooterAtSpeedToleranceRadPerSec = 15.0;
     public static final double kIntakeAtSpeedToleranceRadPerSec = 15.0;
